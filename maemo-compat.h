@@ -13,4 +13,13 @@
 #define O_CLOEXEC 02000000
 #endif
 
+/* The coarse clocks came with kernel 2.6.32 (the phone has 2.6.28) and are not in the glibc 2.5 headers; the exact clocks are the substitute
+ * (clock_gettime would return EINVAL for the real value). Macros, so the order of the includes does not matter. */
+#ifndef CLOCK_REALTIME_COARSE
+#define CLOCK_REALTIME_COARSE CLOCK_REALTIME
+#endif
+#ifndef CLOCK_MONOTONIC_COARSE
+#define CLOCK_MONOTONIC_COARSE CLOCK_MONOTONIC
+#endif
+
 #endif

@@ -2,6 +2,8 @@
 # Wrapper around arm-linux-gnueabi-g++ for Maemo 5 (Fremantle, armel, glibc 2.5), like maemo-gcc for C. Run inside the Workshop.
 # The C++ library is the one of the Ubuntu cross compiler, linked STATICALLY (the system libstdc++ is 4.2.1, too old for C++11 and later).
 # That library was built for glibc 2.39, so scripts/maemo-cxx-compat.c supplies the few newer symbols it asks for (compiled on each call, it is tiny).
+# -D_GLIBCXX_HAVE_OBSOLETE_ISINF/ISNAN: glibc 2.5 has isinf() and isnan() as functions in <math.h>, which the libstdc++ built for glibc 2.39 does not expect: without
+# these two macros <math.h> fails with "std::isinf(double) conflicts with a previous declaration", and so does a program that includes <cmath> after it.
 # Usage: like g++: scripts/maemo-g++ -std=gnu++17 -O2 a.cpp -o a -lSDL ...
 SR="${MAEMO_SYSROOT:-/project/sysroot}"
 HERE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"      # the real folder, also when started through a symlink
@@ -19,5 +21,6 @@ arm-linux-gnueabi-g++ $DEPFLAGS \
     --sysroot="$SR" -B"$SR/usr/lib" -L"$SR/usr/lib" -L"$SR/lib" \
     -nostdinc -nostdinc++ -isystem "$CXXINC" -isystem "$CXXINC/arm-linux-gnueabi" -isystem "$CXXINC/backward" -isystem "$GCCINC" -isystem "$SR/usr/include" \
     -march=armv7-a -mfpu=neon -mfloat-abi=softfp \
+    -D_GLIBCXX_HAVE_OBSOLETE_ISINF=1 -D_GLIBCXX_HAVE_OBSOLETE_ISNAN=1 \
     -include "$HERE/maemo-compat.h" -include "$HERE/maemo-cxx-compat.h" -fuse-ld=gold -Wl,--hash-style=both \
     -static-libstdc++ -static-libgcc "$@" "$SHIM" -lpthread -lrt
